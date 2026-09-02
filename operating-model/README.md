@@ -7,3 +7,7 @@ Gedragsspecificatie voor Dave's AI Chief of Staff. Geen implementatie.
 
 Elke uitspraak draagt een status: Established, Hypothesis of Unknown.
 Implementatieontwerp begint pas na goedkeuring van v1.0.
+
+`dave-operating-model-v1.pdf` is de A4-printversie (20 pagina's), gerenderd uit
+dezelfde bron met een eigen printopmaak en ingesloten letters.
+`build-html.py` genereert de HTML uit de markdown-bron.
