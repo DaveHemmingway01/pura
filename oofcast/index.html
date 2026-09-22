@@ -1,0 +1,1435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Oofcast</title>
+<meta name="theme-color" content="#2B1055">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Bungee+Shade&family=Fredoka:wght@500;600;700&family=VT323&display=swap">
+<style>
+  :root{
+    color-scheme: dark;
+    --ink:#120A1F;
+    --grape:#2B1055;
+    --grape-2:#3D1A75;
+    --magenta:#FF3EA5;
+    --cyan:#2DE2E6;
+    --yellow:#FFD319;
+    --paper:#FFFFFF;
+    --noob-head:#F5CD30;
+    --noob-body:#0D69AC;
+    --noob-legs:#A4BD47;
+    --muted:#C9B8F0;
+    --display:"Bungee", "Arial Black", Impact, sans-serif;
+    --shade:"Bungee Shade", "Bungee", "Arial Black", sans-serif;
+    --body:"Fredoka", "Trebuchet MS", system-ui, sans-serif;
+    --mono:"VT323", ui-monospace, "Courier New", monospace;
+  }
+  html,body{height:100%;margin:0}
+  body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  [hidden]{display:none!important}
+  *{box-sizing:border-box}
+  body{
+    background:
+      radial-gradient(circle at 20% -10%, rgba(255,62,165,.35), transparent 45%),
+      radial-gradient(circle at 110% 20%, rgba(45,226,230,.25), transparent 40%),
+      repeating-linear-gradient(135deg, var(--grape) 0 18px, var(--grape-2) 18px 36px);
+    background-color: var(--grape);
+    color: var(--paper);
+    font-family: var(--body);
+    -webkit-tap-highlight-color: transparent;
+  }
+  #app{
+    max-width: 480px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    padding-block: 12px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  /* header */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .logo{margin:0;line-height:.9}
+  .logo b{
+    display:block;
+    font-family: var(--shade);
+    font-weight:400;
+    font-size: clamp(34px, 11vw, 48px);
+    color: var(--yellow);
+    text-shadow: 3px 3px 0 var(--magenta), 6px 6px 0 var(--ink);
+    letter-spacing: .02em;
+  }
+  .logo small{
+    display:block;
+    font-family: var(--mono);
+    font-size: 17px;
+    color: var(--cyan);
+    margin-top: 6px;
+    letter-spacing: .04em;
+  }
+  .toggles{display:flex;gap:8px;flex-shrink:0}
+  .pill{
+    font-family: var(--display);
+    font-size: 12px;
+    color: var(--ink);
+    background: var(--cyan);
+    border: 3px solid var(--ink);
+    border-radius: 10px;
+    padding: 8px 10px;
+    box-shadow: 3px 3px 0 var(--ink);
+    cursor: pointer;
+    min-width: 48px;
+  }
+  .pill[aria-pressed="false"]{background: var(--muted)}
+  .pill:active,.btn:active,.day:active,.chip:active{transform: translate(3px,3px); box-shadow: 0 0 0 var(--ink)}
+  button:focus-visible, input:focus-visible, summary:focus-visible{outline: 3px dashed var(--yellow); outline-offset: 3px}
+
+  /* stage */
+  .stage{
+    position: relative;
+    aspect-ratio: 10 / 9;
+    max-width: 100%;
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 6px 6px 0 var(--ink), 0 0 0 3px var(--magenta) inset;
+    background: #22C8FF;
+    touch-action: manipulation;
+  }
+  .stage canvas{display:block;width:100%;height:100%;cursor:pointer}
+  .stage::after{
+    content:"";
+    position:absolute; inset:0;
+    pointer-events:none;
+    background: repeating-linear-gradient(to bottom, rgba(0,0,0,.10) 0 1px, transparent 1px 3px);
+    mix-blend-mode: multiply;
+  }
+  .hud{
+    position:absolute; left:10px; right:10px; top:10px;
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+    pointer-events:none;
+  }
+  .tag{
+    font-family: var(--mono);
+    font-size: 16px;
+    line-height: 1;
+    color: var(--paper);
+    background: rgba(18,10,31,.78);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    padding: 4px 7px 3px;
+    max-width: 62%;
+    overflow-wrap: anywhere;
+  }
+  .tag.rec{color: var(--magenta); max-width: none}
+  .tag.rec::before{content:"● "; animation: blink 1s steps(2) infinite}
+  .bubble{
+    position:absolute;
+    font-family: var(--display);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 7px 10px;
+    max-width: 58%;
+    transform: translate(-10%, -100%);
+    pointer-events:none;
+    box-shadow: 3px 3px 0 var(--ink);
+    text-align: center;
+    line-height: 1.15;
+  }
+  .bubble::after{
+    content:""; position:absolute; left:18px; bottom:-12px;
+    border-left: 10px solid transparent; border-right: 6px solid transparent;
+    border-top: 12px solid var(--ink);
+  }
+  .tap-hint{
+    position:absolute; left:50%; bottom:10px; transform:translateX(-50%);
+    font-family: var(--display); font-size: 11px; color: var(--ink);
+    background: var(--yellow); border: 3px solid var(--ink); border-radius: 999px;
+    padding: 5px 12px; white-space: nowrap; pointer-events:none;
+    animation: bob 1.2s ease-in-out infinite;
+  }
+
+  /* day tabs */
+  .days{display:grid;grid-template-columns: 1fr 1fr .8fr;gap:8px}
+  .day{
+    font-family: var(--display);
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 10px 6px 8px;
+    box-shadow: 4px 4px 0 var(--ink);
+    cursor:pointer;
+    line-height:1.1;
+  }
+  .day span{display:block;font-family:var(--mono);font-size:15px;color:#5B4A7A;margin-top:2px}
+  .day[aria-selected="true"]{background: var(--yellow)}
+  .day.locked{background: #8C7BB0; color: #2A1F40; text-decoration: line-through 3px var(--magenta)}
+  .day.locked span{color:#2A1F40; text-decoration:none}
+
+  /* card */
+  .card{
+    background: var(--paper);
+    color: var(--ink);
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    box-shadow: 6px 6px 0 var(--ink);
+    padding: 16px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .card.shake{animation: shake .4s linear}
+  .headline{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .temp{
+    font-family: var(--display);
+    font-size: 58px;
+    line-height: .9;
+    color: var(--magenta);
+    text-shadow: 3px 3px 0 var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .temp sup{font-size:.45em;vertical-align: top;position:relative;top:.2em}
+  .cond{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+  .chip-status{
+    align-self:flex-start;
+    font-family: var(--display);
+    font-size: 12px;
+    background: var(--cyan);
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    padding: 4px 8px 3px;
+    letter-spacing: .03em;
+  }
+  .cond-real{font-family: var(--mono);font-size:18px;color:#5B4A7A}
+  .prophecy-label{
+    font-family: var(--display); font-size: 11px; letter-spacing: .12em;
+    color: #7A5FB0; margin: 0;
+  }
+  .prophecy{
+    margin: 0;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-wrap: pretty;
+  }
+  .stats{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    margin:0;
+  }
+  .stat{
+    background: var(--ink);
+    color: var(--cyan);
+    border-radius: 10px;
+    padding: 8px 10px 6px;
+    min-width:0;
+  }
+  .stat dt{font-family: var(--display); font-size: 10px; letter-spacing:.1em; color: var(--muted)}
+  .stat dd{margin:2px 0 0; font-family: var(--mono); font-size: 22px; line-height:1; font-variant-numeric: tabular-nums}
+  .stat dd small{display:block;font-size:15px;color:var(--yellow);margin-top:3px;overflow-wrap:anywhere}
+  .conf{display:flex;flex-direction:column;gap:5px}
+  .conf-top{display:flex;justify-content:space-between;font-family:var(--display);font-size:11px;letter-spacing:.08em}
+  .conf-top span:last-child{font-family:var(--mono);font-size:18px;letter-spacing:0}
+  .bar{display:grid;grid-template-columns: repeat(20, 1fr);gap:3px;height:16px}
+  .bar i{background:#E3DAF5;border:2px solid var(--ink);border-radius:3px}
+  .bar i.on{background: var(--noob-legs)}
+  .bar i.on.hot{background: var(--magenta)}
+
+  /* actions */
+  .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{
+    font-family: var(--display);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 13px 8px 11px;
+    box-shadow: 4px 4px 0 var(--ink);
+    cursor:pointer;
+  }
+  .btn.alt{background: var(--cyan)}
+  .btn.wide{grid-column: 1 / -1; background: var(--magenta); color: var(--paper); text-shadow: 2px 2px 0 var(--ink)}
+  .search{display:flex;gap:8px;grid-column:1 / -1}
+  .search input{
+    flex:1; min-width:0;
+    font-family: var(--mono); font-size: 22px;
+    background: var(--ink); color: var(--cyan);
+    border: 3px solid var(--ink); border-radius: 12px;
+    padding: 8px 12px 6px;
+    box-shadow: inset 0 0 0 2px var(--cyan);
+  }
+  .search input::placeholder{color:#7F6CAA}
+  .search .btn{padding-inline:14px}
+
+  .status{
+    font-family: var(--mono); font-size: 18px; line-height:1.2;
+    color: var(--yellow);
+    background: rgba(18,10,31,.8);
+    border: 2px dashed var(--yellow);
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin:0;
+  }
+
+  details.machine{
+    background: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 0 0 0 3px var(--cyan) inset;
+    padding: 12px 14px;
+  }
+  details.machine summary{
+    font-family: var(--display); font-size: 14px; color: var(--cyan);
+    cursor:pointer; list-style: none;
+  }
+  details.machine summary::-webkit-details-marker{display:none}
+  details.machine summary::before{content:"▶ ";color:var(--magenta)}
+  details.machine[open] summary::before{content:"▼ "}
+  .machine p{font-family:var(--mono);font-size:17px;color:var(--muted);margin:8px 0 10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    font-family: var(--display); font-size: 12px;
+    background: var(--paper); color: var(--ink);
+    border: 3px solid var(--ink); border-radius: 10px;
+    box-shadow: 3px 3px 0 var(--magenta);
+    padding: 7px 10px 6px; cursor:pointer;
+  }
+  .chip[aria-pressed="true"]{background: var(--yellow)}
+  footer{
+    font-family: var(--mono); font-size: 16px; color: var(--muted);
+    text-align:center; line-height:1.3;
+  }
+  footer a{color: var(--cyan)}
+
+  @keyframes blink{50%{opacity:0}}
+  @keyframes bob{50%{transform:translate(-50%,-4px)}}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)} 20%{transform:translateX(-9px) rotate(-1deg)}
+    40%{transform:translateX(8px) rotate(1deg)} 60%{transform:translateX(-6px)} 80%{transform:translateX(5px)}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tap-hint,.tag.rec::before{animation:none}
+    .card.shake{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="top">
+    <h1 class="logo"><b>OOFCAST</b><small>forecasts 48h. we have trust issues with day 3.</small></h1>
+    <div class="toggles">
+      <button class="pill" id="snd" aria-pressed="true" title="Toggle nerd sounds">SND ON</button>
+      <button class="pill" id="unit" aria-pressed="true" title="Toggle units">°C</button>
+    </div>
+  </header>
+
+  <section class="stage" id="stage" aria-label="Animated weather scene. Tap the block guy.">
+    <canvas id="scene"></canvas>
+    <div class="hud">
+      <div class="tag" id="place">LOCATING YOU...</div>
+      <div class="tag rec" id="mode">SIM</div>
+    </div>
+    <div class="bubble" id="bubble" hidden>OOF</div>
+    <div class="tap-hint" id="hint">TAP TO BOOT SOUND</div>
+  </section>
+
+  <p class="status" id="status" hidden></p>
+
+  <nav class="days" role="tablist" aria-label="Forecast day">
+    <button class="day" role="tab" id="d0" aria-selected="true">TODAY<span id="d0s">now-ish</span></button>
+    <button class="day" role="tab" id="d1" aria-selected="false">TOMORROW<span id="d1s">+24h</span></button>
+    <button class="day locked" role="tab" id="d2" aria-selected="false">DAY 3<span>locked</span></button>
+  </nav>
+
+  <article class="card" id="card" aria-live="polite">
+    <div class="headline">
+      <div class="temp" id="temp">--<sup>°</sup></div>
+      <div class="cond">
+        <span class="chip-status" id="statusChip">BOOTING</span>
+        <span class="cond-real" id="condReal">waiting for the sky</span>
+      </div>
+    </div>
+    <div>
+      <p class="prophecy-label" id="prophLabel">PROPHECY #001</p>
+      <p class="prophecy" id="prophecy">Warming up the vacuum tubes. Please hold while we ask the clouds nicely.</p>
+    </div>
+    <dl class="stats" id="stats"></dl>
+    <div class="conf">
+      <div class="conf-top"><span>CONFIDENCE</span><span id="confNum">--%</span></div>
+      <div class="bar" id="bar"></div>
+    </div>
+  </article>
+
+  <div class="actions">
+    <button class="btn" id="reroll">RE-ROLL PROPHECY</button>
+    <button class="btn alt" id="speak">ROBOT, READ IT</button>
+    <button class="btn wide" id="locate">USE MY LOCATION</button>
+    <form class="search" id="search">
+      <label for="city" hidden>City</label>
+      <input id="city" name="city" type="text" placeholder="or type a city..." autocomplete="off" enterkeyhint="search">
+      <button class="btn alt" type="submit">GO</button>
+    </form>
+  </div>
+
+  <details class="machine" id="machine">
+    <summary>WEATHER MACHINE (cheat codes)</summary>
+    <p>Override reality. The actual sky is not notified.</p>
+    <div class="chips" id="chips"></div>
+  </details>
+
+  <footer>
+    Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0).<br>
+    Prophecies are 100% scientific and 0% legally binding.
+  </footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+const $ = id => document.getElementById(id);
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const INK = "#120A1F";
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  data: null,        // {today, tomorrow}
+  place: "",
+  live: false,
+  day: 0,            // 0 today, 1 tomorrow
+  unitC: true,
+  roll: [0, 0],      // prophecy index per day
+  count: 1,
+  override: null,    // weather machine category
+  audio: false,
+};
+
+/* =========================================================
+   WEATHER LOGIC
+   ========================================================= */
+const WMO = {
+  0:"Clear sky",1:"Mainly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",48:"Rime fog",
+  51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",56:"Freezing drizzle",57:"Freezing drizzle",
+  61:"Light rain",63:"Rain",65:"Heavy rain",66:"Freezing rain",67:"Freezing rain",
+  71:"Light snow",73:"Snow",75:"Heavy snow",77:"Snow grains",80:"Rain showers",81:"Rain showers",
+  82:"Violent showers",85:"Snow showers",86:"Heavy snow showers",95:"Thunderstorm",96:"Thunderstorm + hail",99:"Thunderstorm + big hail"
+};
+function category(d, isToday){
+  const c = d.code;
+  if (c >= 95) return "storm";
+  if ((c>=71&&c<=77)||c===85||c===86) return "snow";
+  if ((c>=61&&c<=67)||(c>=80&&c<=82)) return "rain";
+  if (c>=51&&c<=57) return "drizzle";
+  if (c===45||c===48) return "fog";
+  if ((d.wind||0) >= 38) return "wind";
+  if (isToday && d.isDay === 0 && c <= 3) return "night";
+  if (c === 3) return "cloudy";
+  if (c === 1 || c === 2) return "partly";
+  return "sun";
+}
+const STATUS = {
+  sun:"MAX GRAPHICS", partly:"SKY BUFFERING", cloudy:"TEXTURE NOT LOADED", drizzle:"SKY IS SPITTING",
+  rain:"WET UPDATE v2.0", storm:"SKY RAGE-QUIT", snow:"FROZEN PIXELS", fog:"RENDER DIST: 3M",
+  wind:"YEET WARNING", night:"SUN RECHARGING"
+};
+const CAT_CODE = {sun:0,partly:2,cloudy:3,drizzle:53,rain:63,storm:95,snow:73,fog:45,wind:1,night:0};
+
+const PROPHECIES = {
+  sun: [
+    "The sun renders at max graphics settings. {hi} of pure, unfiltered photons. Your shadow will follow you around all day like a clingy NPC.",
+    "UV index {uv}. Our supercomputer (one Commodore 64 and a very hopeful hamster) recommends SPF 50 and a hat with at least 3 polygons.",
+    "Zero clouds detected. The clouds have logged off to go touch grass. Ironically, you should too.",
+    "Clear skies. Vitamin D drop rate is 100%. This is rare loot. Equip sunglasses for +10 Cool.",
+    "The sky is so blue that three separate painters have filed a complaint for unrealistic colour grading."
+  ],
+  partly: [
+    "Clouds at roughly {cc}% density. The sky is buffering. Please do not unplug the sky.",
+    "Partly cloudy, partly sunny, fully confusing. Pack sunglasses AND a mild existential doubt.",
+    "Sun and clouds are in a 1v1. Current score: Sun 3, Clouds 2. Spectators advised to bring snacks.",
+    "Scattered clouds, like the plot of a Saturday morning cartoon: fluffy, random, and nobody knows where they are going."
+  ],
+  cloudy: [
+    "Overcast. The sky texture failed to load so you get the default grey. Have you tried turning the atmosphere off and on again?",
+    "The sun is AFK. Estimated return: when it feels like it. Leave a message after the beep.",
+    "Big grey lid on the planet today. Scientists call it 'cloud cover'. We call it 'nature's loading screen'.",
+    "Visibility of the sun: 0 frames per second. Mood: 240p."
+  ],
+  drizzle: [
+    "Drizzle: rain's lazy cousin. Won't commit, won't leave. {pp}% chance of being mildly damp and slightly annoyed.",
+    "The sky is doing a sneeze, not a cry. Umbrella optional, hood recommended, dignity at risk.",
+    "Micro-rain detected. Each droplet is approx 0.5 mm, which is the exact size of your motivation this morning."
+  ],
+  rain: [
+    "{mm} mm of rain incoming. That is about {ducks} rubber ducks of water per square metre. We did the math twice. The first time was wrong.",
+    "Chance of rain: {pp}%. Chance you forget your umbrella anyway: 97%. That second number is from a very reliable study we made up.",
+    "Water is falling from the sky again. Physics has not patched this bug in 4.5 billion years. Devs pls fix.",
+    "Rain expected. Puddles will spawn at random coordinates. Jumping in them grants +5 Joy and -20 Sock Integrity."
+  ],
+  storm: [
+    "Thunderstorm. One lightning bolt holds about a billion joules, enough to run a toaster for 11 days straight. Do NOT volunteer as the toaster.",
+    "The sky is rage-quitting and slamming every door on the way out. Stay indoors and pretend to be productive.",
+    "Thunder alert. Count seconds between flash and boom, divide by 3, and you get the distance in km. You also get scared. Both are science.",
+    "Storm mode: ON. The clouds have discovered power chords. Keep your hair away from metal poles and your dignity away from your group chat."
+  ],
+  snow: [
+    "Snow! Tiny frozen hexagons, each one unique, just like your excuses for staying inside.",
+    "{lo} and snowing. Water has switched to solid state. So has your motivation. Hot cocoa is now a medical requirement.",
+    "Blocky snow incoming. Perfect conditions for building a snowman with exactly 2 cubes and a carrot. Classic.",
+    "The world is getting a free white texture pack. Warning: walking on it makes a sound like biting a cookie."
+  ],
+  fog: [
+    "Fog. Render distance set to 3 metres. Beyond that, the world has not loaded yet. Walk carefully, it is all void out there.",
+    "Visibility low. That tall shape in the mist is probably a lamp post. Probably. We are 64% sure.",
+    "The planet is running on low graphics to save battery. Please enjoy the mysterious 80s music video vibes."
+  ],
+  wind: [
+    "Winds up to {wind}. That is {furlongs} furlongs per fortnight, a unit nobody asked for. Hold onto your hat. Actually no, let it go, it wanted to be free.",
+    "Gusty. Your hair is about to get a free restyle, technically called 'Aerodynamic Chaos'.",
+    "Wind warning. Umbrellas will be converted into modern art at no extra charge.",
+    "The air is moving at {wind} with zero chill. Lightweight objects have been granted flying privileges."
+  ],
+  night: [
+    "It is night. The sun is recharging on the other side of the planet. Local stars rendering at a smooth 60 fps.",
+    "Darkness mode enabled. The sky switched to dark theme automatically. Very modern. Very sleepy.",
+    "Night sky, {now}. Perfect conditions to stare at space and think about that awkward thing you said in 2011."
+  ]
+};
+const HOT = " BONUS: at {hi} you can technically slow-cook an egg on your car. Please don't. The egg has a family.";
+const COLD = " BONUS: freezing point reached. Lick no poles. Trust us.";
+
+const BUBBLES = {
+  sun:["I'm photosynthesizing","+10 COOL","sun's out, blocks out","OOF, bright"],
+  partly:["sky.exe is loading","50/50 vibes","is it nice? maybe"],
+  cloudy:["grey again...","where is sun.png","low-poly mood"],
+  drizzle:["it's spitting","damp but chill","ew, mist"],
+  rain:["umbrella armor: 2","splash damage!","I'm a duck now"],
+  storm:["OOF!!","that tickled","ow ow ow","power chords!!"],
+  snow:["c-c-cold","brr.exe","snow = cube rain"],
+  fog:["hello? anyone?","render distance pls","who's there"],
+  wind:["MY HAT!","yeeeet","lag in the air"],
+  night:["zzz...","5 more minutes","sleep mode"]
+};
+
+function fmtT(c){
+  if (c == null || isNaN(c)) return "--";
+  const v = state.unitC ? c : c*9/5+32;
+  return Math.round(v) + "°" + (state.unitC ? "C" : "F");
+}
+function fmtW(k){
+  if (k == null) return "--";
+  return state.unitC ? Math.round(k)+" km/h" : Math.round(k*0.621)+" mph";
+}
+function currentDay(){
+  if (!state.data) return null;
+  return state.day === 0 ? state.data.today : state.data.tomorrow;
+}
+function currentCat(){
+  if (state.override) return state.override;
+  const d = currentDay();
+  if (!d) return "partly";
+  return category(d, state.day === 0);
+}
+function fill(tpl, d){
+  const ducks = Math.max(1, Math.round((d.mm||0) * 1000 / 250 * 10) / 10); // 1 mm on 1 m2 = 1 L; rubber duck approx 250 mL displacement
+  const cc = {0:5,1:25,2:55,3:100}[d.code] ?? 60;
+  return tpl
+    .replace(/{hi}/g, fmtT(d.tMax))
+    .replace(/{lo}/g, fmtT(d.tMin))
+    .replace(/{now}/g, fmtT(d.now ?? d.tMax))
+    .replace(/{uv}/g, (d.uv ?? 0).toFixed(1))
+    .replace(/{pp}/g, Math.round(d.pp ?? 0))
+    .replace(/{mm}/g, (d.mm ?? 0).toFixed(1))
+    .replace(/{ducks}/g, ducks.toLocaleString("en"))
+    .replace(/{cc}/g, cc)
+    .replace(/{wind}/g, fmtW(d.wind))
+    .replace(/{furlongs}/g, Math.round((d.wind||0)*1670.3).toLocaleString("en"));
+}
+
+/* =========================================================
+   RENDER UI
+   ========================================================= */
+function render(){
+  const d = currentDay();
+  const cat = currentCat();
+  if (!d) return;
+  const isToday = state.day === 0;
+  const shown = state.override ? simulatedDay(cat, isToday) : d;
+
+  $("temp").innerHTML = (isToday && shown.now != null ? fmtT(shown.now) : fmtT(shown.tMax)).replace(/°([CF])/, "<sup>°$1</sup>");
+  $("statusChip").textContent = STATUS[cat];
+  $("condReal").textContent = (WMO[shown.code] || "Mystery weather") + (isToday && shown.feels != null ? " · feels " + fmtT(shown.feels) : "") + (state.override ? " (fake)" : "");
+
+  const list = PROPHECIES[cat];
+  const idx = state.roll[state.day] % list.length;
+  let text = fill(list[idx], shown);
+  if (shown.tMax >= 32) text += fill(HOT, shown);
+  else if (shown.tMin <= 0) text += COLD;
+  $("prophecy").textContent = text;
+  $("prophLabel").textContent = "PROPHECY #" + String(state.count).padStart(3, "0") + (isToday ? " · TODAY" : " · TOMORROW");
+
+  const stats = [
+    ["HIGH / LOW", fmtT(shown.tMax) + " / " + fmtT(shown.tMin), shown.tMax >= 30 ? "egg-cooking tier" : shown.tMax <= 5 ? "penguin approved" : "human-compatible"],
+    ["RAIN CHANCE", Math.round(shown.pp ?? 0) + "%", (shown.mm ?? 0).toFixed(1) + " mm = " + Math.round((shown.mm||0)*4) + " duck-loads"],
+    ["WIND MAX", fmtW(shown.wind), Math.round((shown.wind||0)*1670.3).toLocaleString("en") + " furlongs/fortnight"],
+    isToday && shown.pressure
+      ? ["PRESSURE", Math.round(shown.pressure) + " hPa", "= " + (shown.pressure/1013.25).toFixed(3) + " atmospheres of drama"]
+      : ["UV INDEX", (shown.uv ?? 0).toFixed(1), (shown.uv||0) >= 6 ? "vampires: stay in" : (shown.uv||0) >= 3 ? "sunscreen side quest" : "pale-friendly"]
+  ];
+  $("stats").innerHTML = "";
+  for (const [k, v, sub] of stats){
+    const box = document.createElement("div"); box.className = "stat";
+    const dt = document.createElement("dt"); dt.textContent = k;
+    const dd = document.createElement("dd"); dd.textContent = v;
+    const sm = document.createElement("small"); sm.textContent = sub;
+    dd.appendChild(sm); box.append(dt, dd); $("stats").appendChild(box);
+  }
+
+  // confidence: today high, tomorrow lower, rain chance near 50 = most uncertain
+  const wobble = Math.abs(50 - (shown.pp ?? 0)) / 50; // 0..1
+  const conf = state.override ? 100 : Math.round((isToday ? 88 : 71) + wobble * 9 + (state.count % 3) * 0.7);
+  $("confNum").textContent = state.override ? "100% (you cheated)" : conf + "% ±lol";
+  const bar = $("bar"); bar.innerHTML = "";
+  for (let i = 0; i < 20; i++){
+    const b = document.createElement("i");
+    if (i < Math.round(conf/5)) b.className = "on" + (conf > 95 ? " hot" : "");
+    bar.appendChild(b);
+  }
+
+  $("d0").setAttribute("aria-selected", isToday);
+  $("d1").setAttribute("aria-selected", !isToday);
+  if (state.data){
+    $("d0s").textContent = fmtT(state.data.today.now ?? state.data.today.tMax);
+    $("d1s").textContent = fmtT(state.data.tomorrow.tMax);
+  }
+  $("mode").textContent = state.override ? "CHEAT" : state.live ? "LIVE" : "SIM";
+  $("unit").textContent = state.unitC ? "°C" : "°F";
+  for (const ch of document.querySelectorAll(".chip")) ch.setAttribute("aria-pressed", ch.dataset.cat === state.override);
+  scene.setCat(cat, shown);
+}
+
+function simulatedDay(cat, isToday){
+  const base = {
+    sun:{tMax:27,tMin:16,pp:2,wind:12,uv:8.4,mm:0},
+    partly:{tMax:21,tMin:13,pp:18,wind:15,uv:5.1,mm:0},
+    cloudy:{tMax:16,tMin:11,pp:30,wind:14,uv:1.9,mm:0.2},
+    drizzle:{tMax:14,tMin:10,pp:60,wind:16,uv:1.2,mm:1.4},
+    rain:{tMax:13,tMin:9,pp:88,wind:22,uv:0.8,mm:11.6},
+    storm:{tMax:19,tMin:14,pp:95,wind:41,uv:0.5,mm:27.3},
+    snow:{tMax:-1,tMin:-7,pp:80,wind:18,uv:0.7,mm:6.2},
+    fog:{tMax:12,tMin:7,pp:10,wind:4,uv:1,mm:0},
+    wind:{tMax:17,tMin:10,pp:15,wind:58,uv:3.5,mm:0},
+    night:{tMax:22,tMin:12,pp:5,wind:8,uv:0,mm:0}
+  }[cat];
+  const d = Object.assign({code: CAT_CODE[cat], isDay: cat === "night" ? 0 : 1}, base);
+  if (isToday){ d.now = cat === "night" ? base.tMin + 3 : base.tMax - 2; d.feels = d.now - (base.wind > 30 ? 5 : 1); d.pressure = cat === "storm" ? 996 : cat === "sun" ? 1022 : 1013; }
+  return d;
+}
+
+/* =========================================================
+   DATA
+   ========================================================= */
+async function fetchJSON(url, ms = 8000){
+  const ctl = new AbortController();
+  const tm = setTimeout(() => ctl.abort(), ms);
+  try {
+    const r = await fetch(url, {signal: ctl.signal});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } finally { clearTimeout(tm); }
+}
+function parse(j){
+  const d = j.daily, c = j.current;
+  const mk = i => ({
+    code: d.weather_code[i], tMax: d.temperature_2m_max[i], tMin: d.temperature_2m_min[i],
+    pp: d.precipitation_probability_max ? d.precipitation_probability_max[i] : 0,
+    wind: d.wind_speed_10m_max[i], uv: d.uv_index_max ? d.uv_index_max[i] : 0,
+    mm: d.precipitation_sum[i], isDay: 1
+  });
+  const today = mk(0);
+  Object.assign(today, {code: c.weather_code, now: c.temperature_2m, feels: c.apparent_temperature,
+    isDay: c.is_day, pressure: c.pressure_msl});
+  today.wind = Math.max(today.wind, c.wind_speed_10m);
+  return {today, tomorrow: mk(1)};
+}
+async function loadLive(lat, lon, name){
+  setStatus("DIALING THE SKY AT " + lat.toFixed(2) + ", " + lon.toFixed(2) + "...");
+  sfx.dial();
+  const url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon +
+    "&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day,pressure_msl" +
+    "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,uv_index_max" +
+    "&timezone=auto&forecast_days=2";
+  const j = await fetchJSON(url);
+  state.data = parse(j);
+  state.live = true;
+  state.override = null;
+  state.place = name || (lat.toFixed(2) + "°, " + lon.toFixed(2) + "°");
+  $("place").textContent = "LOC: " + state.place.toUpperCase();
+  setStatus("");
+  state.count++;
+  render();
+  sfx.coin();
+  if (!name){
+    try {
+      const g = await fetchJSON("https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + lat + "&longitude=" + lon + "&localityLanguage=en", 5000);
+      const nm = g.city || g.locality || g.principalSubdivision;
+      if (nm){ state.place = nm; $("place").textContent = "LOC: " + nm.toUpperCase(); }
+    } catch (e) { /* coordinates are nerdier anyway */ }
+  }
+}
+function goSim(msg){
+  if (!state.data){
+    state.data = {today: simulatedDay("partly", true), tomorrow: simulatedDay("rain", false)};
+    state.place = "SIMULATION ISLAND";
+    $("place").textContent = "LOC: SIMULATION ISLAND";
+    state.live = false;
+    render();
+  }
+  if (msg) setStatus(msg);
+}
+function locate(){
+  if (!navigator.geolocation){ goSim("No GPS module found in this browser. Type a city, or open the Weather Machine."); return; }
+  setStatus("TRIANGULATING YOUR COORDINATES...");
+  setTimeout(() => { if (!state.live && $("status").textContent.startsWith("TRIANGULATING")) goSim("Still waiting for your location. Allow it, type a city, or open the Weather Machine."); }, 12000);
+  navigator.geolocation.getCurrentPosition(
+    p => loadLive(+p.coords.latitude.toFixed(3), +p.coords.longitude.toFixed(3)).catch(() => {
+      sfx.error();
+      goSim("The sky did not answer (network blocked or offline). Running in SIMULATION MODE. Open the Weather Machine to pick a sky.");
+    }),
+    () => goSim("Location access denied. Type a city below, or open the Weather Machine to fake it."),
+    {timeout: 9000, maximumAge: 600000}
+  );
+}
+async function searchCity(q){
+  if (!q) return;
+  setStatus("SEARCHING THE ATLAS FOR '" + q.toUpperCase() + "'...");
+  try {
+    const g = await fetchJSON("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name=" + encodeURIComponent(q), 6000);
+    if (!g.results || !g.results.length){ sfx.error(); setStatus("City '" + q + "' not found. Check the spelling, or try a bigger nearby city."); return; }
+    const r = g.results[0];
+    await loadLive(r.latitude, r.longitude, r.name + (r.country_code ? ", " + r.country_code : ""));
+  } catch (e) {
+    sfx.error();
+    goSim("Could not reach the weather servers from here (network blocked or offline). Simulation mode is still fully silly.");
+  }
+}
+function setStatus(t){ const el = $("status"); el.textContent = t; el.hidden = !t; }
+
+/* =========================================================
+   SOUND (WebAudio, all synthesized)
+   ========================================================= */
+const A = {ctx: null, master: null, noise: null, bed: null, bedF: null, bedG: null, lfo: null, lfoG: null};
+function audioInit(){
+  if (A.ctx) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  A.ctx = new AC();
+  A.master = A.ctx.createGain(); A.master.gain.value = 0.55; A.master.connect(A.ctx.destination);
+  const len = A.ctx.sampleRate * 2, buf = A.ctx.createBuffer(1, len, A.ctx.sampleRate), ch = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) ch[i] = Math.random()*2 - 1;
+  A.noise = buf;
+  // ambient noise bed (rain / wind / storm hiss)
+  A.bed = A.ctx.createBufferSource(); A.bed.buffer = buf; A.bed.loop = true;
+  A.bedF = A.ctx.createBiquadFilter(); A.bedF.type = "bandpass"; A.bedF.frequency.value = 1000; A.bedF.Q.value = 0.7;
+  A.bedG = A.ctx.createGain(); A.bedG.gain.value = 0;
+  A.lfo = A.ctx.createOscillator(); A.lfo.frequency.value = 0.25;
+  A.lfoG = A.ctx.createGain(); A.lfoG.gain.value = 0;
+  A.lfo.connect(A.lfoG).connect(A.bedF.frequency);
+  A.bed.connect(A.bedF).connect(A.bedG).connect(A.master);
+  A.bed.start(); A.lfo.start();
+}
+const now = () => A.ctx.currentTime;
+function tone(f, d, type = "square", vol = .15, when = 0, slide = null){
+  if (!A.ctx || !state.audio) return;
+  const t = now() + when, o = A.ctx.createOscillator(), g = A.ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + d);
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g).connect(A.master); o.start(t); o.stop(t + d + 0.05);
+}
+function noise(d, vol = .2, type = "lowpass", freq = 1000, when = 0, q = 1, sweepTo = null){
+  if (!A.ctx || !state.audio) return;
+  const t = now() + when, s = A.ctx.createBufferSource(), f = A.ctx.createBiquadFilter(), g = A.ctx.createGain();
+  s.buffer = A.noise; f.type = type; f.frequency.setValueAtTime(freq, t); f.Q.value = q;
+  if (sweepTo) f.frequency.exponentialRampToValueAtTime(sweepTo, t + d);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  s.connect(f).connect(g).connect(A.master); s.start(t, Math.random()); s.stop(t + d + 0.05);
+}
+const N = n => 440 * Math.pow(2, (n - 69) / 12); // midi to Hz
+const sfx = {
+  boot(){ [60,64,67,72,76,79,84].forEach((m,i) => tone(N(m), .12, "square", .09, i*.07)); tone(N(96), .5, "triangle", .08, .5); },
+  coin(){ tone(988, .08, "square", .12); tone(1319, .35, "square", .12, .08); },
+  error(){ tone(140, .16, "square", .15); tone(110, .3, "square", .15, .18); },
+  jump(){ tone(180, .16, "square", .12, 0, 760); },
+  select(){ tone(660, .05, "square", .1); tone(880, .07, "square", .1, .05); },
+  oof(){
+    if (!A.ctx || !state.audio) return;
+    const t = now();
+    for (const [f0, f1, fq, v] of [[330,150,900,.45],[330,150,2300,.18]]){
+      const o = A.ctx.createOscillator(), f = A.ctx.createBiquadFilter(), g = A.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + .2);
+      f.type = "bandpass"; f.frequency.setValueAtTime(fq, t); f.frequency.exponentialRampToValueAtTime(fq*.6, t + .2); f.Q.value = 3;
+      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + .015); g.gain.exponentialRampToValueAtTime(0.0001, t + .24);
+      o.connect(f).connect(g).connect(A.master); o.start(t); o.stop(t + .3);
+    }
+  },
+  zap(){ noise(.35, .5, "highpass", 3000, 0, 1, 400); tone(1400, .35, "sawtooth", .12, 0, 50); },
+  thunder(delay = 0){ noise(2.2, .6, "lowpass", 380, delay, 1, 60); noise(.4, .3, "lowpass", 900, delay, 1, 100); },
+  staticBurst(){ noise(.28, .2, "bandpass", 3500, 0, .6); tone(15734, .2, "sine", .02); /* CRT whine, 80s TV */ },
+  dial(){
+    // fake 56k modem handshake, abridged for your ears
+    [[697,1209],[770,1336],[852,1477],[941,1336],[697,1336],[852,1209]].forEach(([a,b],i) => {
+      tone(a, .07, "sine", .06, i*.09); tone(b, .07, "sine", .06, i*.09);
+    });
+    tone(2100, .35, "sine", .07, .6);
+    for (let i = 0; i < 8; i++) tone(1200 + (i%2)*1000, .06, "square", .03, 1 + i*.05);
+    noise(.5, .12, "bandpass", 1800, 1.4, 4);
+  },
+  sunJingle(){ [72,76,79,84,79,84].forEach((m,i) => tone(N(m), .1, "triangle", .06, i*.09)); },
+  sadTrombone(){ [55,54,53].forEach((m,i) => tone(N(m), .3, "sawtooth", .045, i*.32)); tone(N(52), .9, "sawtooth", .045, .96); },
+  twinkle(){ tone(1800 + Math.random()*1600, .18, "triangle", .035); },
+  droplet(){ tone(900 + Math.random()*900, .07, "sine", .045, 0, 380); },
+  cricket(){ for (let i = 0; i < 3; i++) tone(4300, .02, "sine", .03, i*.045); },
+  snore(){ noise(1.1, .07, "lowpass", 240, 0, 3, 700); },
+  foghorn(){ tone(65, 1.3, "sawtooth", .07); tone(98, 1.3, "sawtooth", .03); },
+  whoosh(){ noise(.7, .12, "bandpass", 400, 0, 2, 2400); },
+  blip(){ tone(N(84 + Math.floor(Math.random()*12)), .04, "square", .04); }
+};
+function setBed(cat){
+  if (!A.ctx) return;
+  const t = now(), p = {
+    rain:[2200,.06,0], drizzle:[3200,.025,0], storm:[700,.11,0], wind:[600,.1,450], snow:[5000,.008,0]
+  }[cat] || [1000, 0, 0];
+  A.bedF.frequency.setTargetAtTime(p[0], t, .3);
+  A.bedG.gain.setTargetAtTime(state.audio ? p[1] : 0, t, .4);
+  A.lfoG.gain.setTargetAtTime(p[2], t, .3);
+}
+let ambT = 0;
+setInterval(() => {
+  if (!A.ctx || !state.audio || document.hidden) return;
+  ambT += .25;
+  const c = scene.cat, r = Math.random();
+  if (c === "sun" && ambT % 6 === 0) sfx.sunJingle();
+  else if ((c === "rain" || c === "drizzle") && r < (c === "rain" ? .55 : .25)) sfx.droplet();
+  else if (c === "snow" && r < .3) sfx.twinkle();
+  else if (c === "night"){ if (r < .12) sfx.cricket(); if (ambT % 5 === 0) sfx.snore(); }
+  else if (c === "fog" && ambT % 7 === 0) sfx.foghorn();
+  else if (c === "cloudy" && ambT % 9 === 0) sfx.sadTrombone();
+  else if (c === "wind" && r < .06) sfx.whoosh();
+  else if (c === "partly" && r < .08) sfx.blip();
+}, 250);
+
+function unlockAudio(){
+  if (state.audio) return;
+  audioInit();
+  if (!A.ctx) return;
+  A.ctx.resume && A.ctx.resume();
+  state.audio = $("snd").getAttribute("aria-pressed") === "true";
+  $("hint").hidden = true;
+  if (state.audio){ sfx.boot(); setBed(scene.cat); }
+}
+
+/* =========================================================
+   SCENE (canvas, blocky 80s cartoon)
+   ========================================================= */
+const scene = (() => {
+  const cv = $("scene"), ctx = cv.getContext("2d");
+  let W = 0, H = 0, s = 1, gy = 0, DPR = 1;
+  const self = {cat: "partly", day: null};
+  let t = 0, last = performance.now();
+  const drops = [], flakes = [], leaves = [], splashes = [], lines = [];
+  let clouds = [], stars = [];
+  let flash = 0, bolt = null, nextBolt = 2, zap = 0, jump = 0, jumpV = 0, staticT = 0, bubbleT = 0;
+  const noiseC = document.createElement("canvas"); noiseC.width = 80; noiseC.height = 72;
+  const nctx = noiseC.getContext("2d");
+  let halftone = null;
+
+  const SKY = {
+    sun:["#1FB8FF","#9CF3FF"], partly:["#3AA8F5","#C7EEFF"], cloudy:["#7E86AE","#C9CDE2"],
+    drizzle:["#6C7FB4","#B3C0E4"], rain:["#445488","#8E9BC8"], storm:["#1B1140","#4F2B80"],
+    snow:["#9DBDEB","#F0F7FF"], fog:["#ABA6C0","#E6E2EE"], wind:["#48BDE6","#DDF7FF"], night:["#0B0930","#3C1F70"]
+  };
+
+  function resize(){
+    const r = cv.getBoundingClientRect();
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    W = r.width; H = r.height;
+    cv.width = Math.round(W*DPR); cv.height = Math.round(H*DPR);
+    s = Math.min(W/400, H/360);
+    gy = H*0.8;
+    makeHalftone();
+    clouds = [];
+    stars = Array.from({length: 40}, () => ({x: Math.random()*W, y: Math.random()*H*0.6, p: Math.random()*6}));
+    self.setCat(self.cat, self.day, true);
+  }
+  function makeHalftone(){
+    halftone = document.createElement("canvas");
+    const n = Math.max(6, Math.round(8*s));
+    halftone.width = halftone.height = n;
+    const h = halftone.getContext("2d");
+    h.fillStyle = "rgba(255,255,255,1)";
+    h.beginPath(); h.arc(n/2, n/2, n*0.18, 0, Math.PI*2); h.fill();
+  }
+
+  function rr(x, y, w, h, r){
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
+  }
+  function box(x, y, w, h, fill, r = 3, lw = 3){
+    rr(x, y, w, h, r*s); ctx.fillStyle = fill; ctx.fill();
+    ctx.lineWidth = lw*s; ctx.strokeStyle = INK; ctx.stroke();
+  }
+
+  self.setCat = (cat, day, silent) => {
+    const changed = cat !== self.cat;
+    self.cat = cat; self.day = day;
+    const n = {sun:1, partly:3, cloudy:6, drizzle:5, rain:6, storm:6, snow:5, fog:2, wind:4, night:1}[cat];
+    clouds = Array.from({length: n}, (_, i) => ({
+      x: (i + 0.3) * W / n + Math.random()*30, y: H*(0.08 + Math.random()*0.22),
+      k: 0.7 + Math.random()*0.6, v: (cat === "wind" ? 40 : 6) + Math.random()*8
+    }));
+    if (changed && !silent){ staticT = reduceMotion ? 0 : .35; sfx.staticBurst(); }
+    setBed(cat);
+  };
+  self.poke = () => {
+    if (jump <= 0){ jump = 0.001; jumpV = 260*s; }
+    sfx.jump(); setTimeout(sfx.oof, 120);
+    const list = BUBBLES[self.cat];
+    showBubble(Math.random() < .35 ? "OOF!" : list[Math.floor(Math.random()*list.length)]);
+  };
+  self.cx = () => W*0.4;
+
+  function showBubble(txt){
+    const b = $("bubble"); b.textContent = txt; b.hidden = false; bubbleT = 2.2;
+  }
+
+  /* ---------- background ---------- */
+  function drawSky(){
+    const [a, b] = SKY[self.cat];
+    const g = ctx.createLinearGradient(0, 0, 0, gy);
+    g.addColorStop(0, a); g.addColorStop(1, b);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, gy);
+    // 80s halftone print dots
+    if (halftone){
+      ctx.save(); ctx.globalAlpha = self.cat === "night" || self.cat === "storm" ? .07 : .16;
+      ctx.fillStyle = ctx.createPattern(halftone, "repeat");
+      ctx.fillRect(0, 0, W, gy*0.55);
+      ctx.restore();
+    }
+  }
+  function drawStars(){
+    ctx.fillStyle = "#FFF6B0";
+    for (const st of stars){
+      const tw = (Math.sin(t*2 + st.p) + 1)/2;
+      const z = (1.5 + tw*2.5)*s;
+      ctx.globalAlpha = .4 + tw*.6;
+      ctx.fillRect(st.x - z/2, st.y - z/2, z, z);
+    }
+    ctx.globalAlpha = 1;
+  }
+  function drawSun(){
+    const x = W*0.8, y = H*0.2, r = 34*s;
+    ctx.save(); ctx.translate(x, y);
+    ctx.save(); ctx.rotate(t*0.4);
+    for (let i = 0; i < 8; i++){
+      ctx.rotate(Math.PI/4);
+      ctx.beginPath(); ctx.moveTo(-9*s, -r-6*s); ctx.lineTo(0, -r-26*s - Math.sin(t*4+i)*4*s); ctx.lineTo(9*s, -r-6*s); ctx.closePath();
+      ctx.fillStyle = "#FF9F1C"; ctx.fill(); ctx.lineWidth = 3*s; ctx.strokeStyle = INK; ctx.stroke();
+    }
+    ctx.restore();
+    ctx.rotate(Math.sin(t)*0.08);
+    box(-r, -r, r*2, r*2, "#FFD319", 10, 3.5);
+    // pixel sunglasses
+    ctx.fillStyle = INK;
+    ctx.fillRect(-24*s, -10*s, 20*s, 11*s); ctx.fillRect(4*s, -10*s, 20*s, 11*s); ctx.fillRect(-6*s, -8*s, 12*s, 3*s);
+    ctx.fillStyle = "#2DE2E6"; ctx.fillRect(-20*s, -8*s, 5*s, 3*s); ctx.fillRect(8*s, -8*s, 5*s, 3*s);
+    ctx.lineWidth = 3*s; ctx.strokeStyle = INK;
+    ctx.beginPath(); ctx.arc(0, 6*s, 12*s, .15*Math.PI, .85*Math.PI); ctx.stroke();
+    ctx.restore();
+  }
+  function drawMoon(){
+    const x = W*0.8, y = H*0.2, r = 30*s;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(-0.2 + Math.sin(t*.5)*.05);
+    box(-r, -r, r*2, r*2, "#FFF1A8", 12, 3.5);
+    ctx.fillStyle = SKY.night[0]; rr(-r + 22*s, -r - 8*s, r*2, r*2, 12*s); ctx.fill();
+    ctx.fillStyle = INK; ctx.fillRect(-14*s, -4*s, 8*s, 2.5*s);
+    ctx.restore();
+  }
+  function drawCloud(c){
+    const dark = {storm:"#5A4F7A", rain:"#8C93B0", drizzle:"#B5BAD0", cloudy:"#D8DAE6"}[self.cat] || "#FFFFFF";
+    const k = c.k*s, parts = [[-50,-6,44,30],[-20,-26,48,50],[16,-14,42,38],[-60,6,120,22]];
+    ctx.save(); ctx.translate(c.x, c.y);
+    ctx.lineWidth = 7*k; ctx.strokeStyle = INK; ctx.lineJoin = "round";
+    for (const [x,y,w,h] of parts){ rr(x*k, y*k, w*k, h*k, 10*k); ctx.stroke(); }
+    ctx.fillStyle = dark;
+    for (const [x,y,w,h] of parts){ rr(x*k, y*k, w*k, h*k, 10*k); ctx.fill(); }
+    ctx.fillStyle = "rgba(255,255,255,.55)";
+    rr(-14*k, -20*k, 16*k, 7*k, 3*k); ctx.fill();
+    if (self.cat === "storm"){ // angry eyebrows
+      ctx.strokeStyle = INK; ctx.lineWidth = 3*k;
+      ctx.beginPath(); ctx.moveTo(-18*k,-6*k); ctx.lineTo(-6*k,-1*k); ctx.moveTo(18*k,-6*k); ctx.lineTo(6*k,-1*k); ctx.stroke();
+      ctx.fillStyle = INK; ctx.fillRect(-10*k, 1*k, 4*k, 4*k); ctx.fillRect(6*k, 1*k, 4*k, 4*k);
+    }
+    ctx.restore();
+  }
+  function drawHills(){
+    const col = {night:"#26164F", storm:"#2B1A4F", snow:"#C8D6EE", fog:"#B7B1CC"}[self.cat] || "#7B5CC9";
+    ctx.fillStyle = col; ctx.strokeStyle = INK; ctx.lineWidth = 3*s;
+    ctx.beginPath(); ctx.moveTo(0, gy);
+    const step = 26*s;
+    for (let x = 0, i = 0; x <= W + step; x += step, i++){
+      const h = (Math.sin(i*0.9) + Math.sin(i*0.37 + 1) + 2.4) * 18*s;
+      ctx.lineTo(x, gy - h); ctx.lineTo(x + step, gy - h);
+    }
+    ctx.lineTo(W, gy); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  function drawTree(x, sc){
+    const sway = self.cat === "wind" ? Math.sin(t*5)*0.12 + 0.18 : self.cat === "storm" ? Math.sin(t*7)*0.08 : Math.sin(t)*0.02;
+    const k = s*sc;
+    ctx.save(); ctx.translate(x, gy);
+    box(-7*k, -40*k, 14*k, 40*k, "#8B5A2B", 2, 3);
+    ctx.rotate(sway);
+    const leaf = self.cat === "snow" ? "#EAF4FF" : self.cat === "night" ? "#2F6B3A" : "#3FAE4A";
+    box(-26*k, -86*k, 52*k, 50*k, leaf, 6, 3.5);
+    ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.fillRect(-20*k, -80*k, 14*k, 8*k);
+    ctx.restore();
+  }
+  function drawGround(){
+    const snowy = self.cat === "snow";
+    ctx.fillStyle = snowy ? "#EEF5FF" : self.cat === "night" ? "#2E6E35" : "#4CAF3F";
+    ctx.fillRect(0, gy, W, H - gy);
+    // studs, the baseplate special
+    const st = 22*s;
+    for (let row = 0; row < 3; row++){
+      for (let x = (row%2)*st/2; x < W + st; x += st){
+        const y = gy + 12*s + row*st*0.85;
+        ctx.fillStyle = snowy ? "#DCE7F7" : "rgba(0,0,0,.14)";
+        ctx.beginPath(); ctx.ellipse(x, y + 2*s, 7*s, 4*s, 0, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = snowy ? "#FFFFFF" : "rgba(255,255,255,.22)";
+        ctx.beginPath(); ctx.ellipse(x, y, 7*s, 4*s, 0, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    ctx.fillStyle = INK; ctx.fillRect(0, gy - 2*s, W, 4*s);
+    if (self.cat === "rain" || self.cat === "storm" || self.cat === "drizzle"){
+      const pw = (self.cat === "drizzle" ? 30 : 58)*s + Math.sin(t*2)*3*s;
+      ctx.fillStyle = "#58A6FF"; ctx.strokeStyle = INK; ctx.lineWidth = 2.5*s;
+      ctx.beginPath(); ctx.ellipse(self.cx() + 6*s, gy + 12*s, pw, 7*s, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.fillRect(self.cx() - pw*.4, gy + 9*s, pw*.35, 2.5*s);
+    }
+  }
+  function drawSnowman(){
+    const x = W*0.76, k = s;
+    ctx.save(); ctx.translate(x, gy);
+    box(-24*k, -44*k, 48*k, 44*k, "#FFFFFF", 6, 3.5);
+    box(-17*k, -76*k, 34*k, 34*k, "#FFFFFF", 6, 3.5);
+    ctx.fillStyle = INK; ctx.fillRect(-9*k, -66*k, 5*k, 5*k); ctx.fillRect(4*k, -66*k, 5*k, 5*k);
+    ctx.fillStyle = "#FF8A1C"; ctx.beginPath(); ctx.moveTo(0, -58*k); ctx.lineTo(18*k, -55*k); ctx.lineTo(0, -52*k); ctx.closePath(); ctx.fill();
+    ctx.lineWidth = 2*k; ctx.strokeStyle = INK; ctx.stroke();
+    box(-15*k, -94*k, 30*k, 18*k, INK, 2, 2);
+    ctx.restore();
+  }
+
+  /* ---------- the block guy ---------- */
+  function drawNoob(){
+    const u = s*0.95, cat = self.cat;
+    const cx = self.cx();
+    let bounce = 0, lean = 0, jx = 0, aL = 0.06, aR = -0.06, lL = 0, lR = 0, mouth = "smile";
+    const hot = self.day && self.day.tMax >= 30, cold = self.day && self.day.tMin <= 0;
+    switch (cat){
+      case "sun": { const b = Math.sin(t*6); bounce = Math.abs(b)*9*u; aL = Math.PI - .5 + b*.45; aR = -(Math.PI - .5) + b*.45; lL = b*.25; lR = -b*.25; break; }
+      case "partly": { bounce = Math.abs(Math.sin(t*2))*2*u; if ((t % 5) < 1.4){ aR = -Math.PI*.85 + Math.sin(t*14)*.35; } break; }
+      case "cloudy": { lean = .05; aL = .02; aR = -.02; mouth = "flat"; break; }
+      case "drizzle": case "rain": { aR = -Math.PI + .1; bounce = Math.abs(Math.sin(t*2.5))*2*u; mouth = "smug"; break; }
+      case "storm": { jx = Math.sin(t*50)*1.6*u; aL = Math.PI*.6 + Math.sin(t*13)*1.1; aR = -Math.PI*.6 + Math.sin(t*13+1)*1.1; mouth = "o"; break; }
+      case "snow": { jx = Math.sin(t*55)*1.3*u; aL = -.55; aR = .55; mouth = "chatter"; break; }
+      case "fog": { aR = -Math.PI/2; lL = Math.sin(t*4)*.3; lR = -lL; mouth = "flat"; break; }
+      case "wind": { lean = -.16; aL = .7 + Math.sin(t*9)*.15; aR = .5 + Math.sin(t*9+2)*.15; mouth = "o"; break; }
+      case "night": { bounce = Math.sin(t*1.3)*1.5*u; aL = .02; aR = -.02; mouth = "sleep"; break; }
+    }
+    if (reduceMotion){ bounce *= .2; jx = 0; }
+    const jy = jump > 0 ? jump : 0;
+    const legH = 38*u, torsoH = 40*u, torsoTop = -(legH + torsoH), headS = 34*u, headTop = torsoTop - headS - 2*u;
+    const white = zap > 0 && Math.floor(zap*16) % 2 === 0;
+    const C = white ? {h:"#FFFFFF", b:"#FFFFFF", l:"#FFFFFF"} : {h:"#F5CD30", b:"#0D69AC", l:"#A4BD47"};
+
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,.25)";
+    ctx.beginPath(); ctx.ellipse(cx, gy + 4*u, 34*u*(1 - Math.min(jy, 80*u)/(160*u)), 6*u, 0, 0, Math.PI*2); ctx.fill();
+
+    ctx.save();
+    ctx.translate(cx + jx, gy - bounce - jy);
+    ctx.rotate(lean);
+    // legs
+    for (const [x, a] of [[-11*u, lL], [11*u, lR]]){
+      ctx.save(); ctx.translate(x, -legH); ctx.rotate(a);
+      box(-11*u, 0, 22*u, legH, C.l, 3, 3); ctx.restore();
+    }
+    // torso
+    box(-22*u, torsoTop, 44*u, torsoH + 2*u, C.b, 3, 3);
+    if (white){ // cartoon skeleton ribs
+      ctx.strokeStyle = INK; ctx.lineWidth = 3*u;
+      ctx.beginPath(); ctx.moveTo(0, torsoTop + 5*u); ctx.lineTo(0, -legH - 4*u);
+      for (let i = 0; i < 3; i++){ const y = torsoTop + 10*u + i*9*u; ctx.moveTo(-14*u, y); ctx.lineTo(14*u, y); }
+      ctx.stroke();
+    }
+    // arms
+    for (const [x, a] of [[-32*u, aL], [32*u, aR]]){
+      ctx.save(); ctx.translate(x, torsoTop + 4*u); ctx.rotate(a);
+      box(-9*u, -4*u, 18*u, 40*u, C.h, 3, 3); ctx.restore();
+    }
+    // accessories behind head
+    if (cat === "rain" || cat === "drizzle"){
+      const ux = 32*u, top = headTop - 30*u, hand = torsoTop - 36*u;
+      ctx.strokeStyle = INK; ctx.lineWidth = 4*u;
+      ctx.beginPath(); ctx.moveTo(ux, hand + 4*u); ctx.lineTo(ux, top); ctx.stroke();
+      const R = 60*u, cxu = 14*u;
+      ctx.save(); ctx.translate(cxu, top); ctx.rotate(Math.sin(t*2)*.06);
+      ctx.beginPath(); ctx.moveTo(-R, 0); ctx.arc(0, 0, R, Math.PI, 0);
+      for (let i = 4; i >= 0; i--){ const x0 = -R + i*(R*2/5); ctx.quadraticCurveTo(x0 + R/5, 12*u, x0, 0); }
+      ctx.closePath();
+      ctx.fillStyle = "#FF3EA5"; ctx.fill(); ctx.lineWidth = 3.5*u; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.fillStyle = "#FFD319";
+      ctx.beginPath(); ctx.moveTo(-R*.2, 0); ctx.arc(0, 0, R*.2, Math.PI, 0); ctx.fill();
+      ctx.restore();
+    }
+    if (cat === "fog"){
+      const hx = 32*u + 40*u;
+      const g = ctx.createLinearGradient(hx, 0, hx + 170*u, 0);
+      g.addColorStop(0, "rgba(255,240,140,.85)"); g.addColorStop(1, "rgba(255,240,140,0)");
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.moveTo(hx, torsoTop - 2*u); ctx.lineTo(hx + 170*u, torsoTop - 50*u); ctx.lineTo(hx + 170*u, torsoTop + 50*u); ctx.closePath(); ctx.fill();
+      box(hx - 14*u, torsoTop - 3*u, 18*u, 12*u, "#555", 2, 2.5);
+    }
+    // head
+    const squash = hot ? 0.9 + Math.sin(t*3)*0.03 : 1;
+    ctx.save(); ctx.translate(0, headTop + headS); ctx.scale(1, squash); ctx.translate(0, -(headTop + headS));
+    box(-18*u, headTop, 36*u, headS, C.h, 7, 3.5);
+    if (cold && !white){ ctx.fillStyle = "rgba(120,190,255,.45)"; rr(-18*u, headTop, 36*u, headS*.45, 7*u); ctx.fill(); }
+    // face
+    const ey = headTop + 13*u;
+    ctx.fillStyle = INK; ctx.strokeStyle = INK; ctx.lineWidth = 2.6*u; ctx.lineCap = "round";
+    if (mouth === "sleep"){
+      ctx.beginPath(); ctx.moveTo(-10*u, ey + 1*u); ctx.lineTo(-4*u, ey + 1*u); ctx.moveTo(4*u, ey + 1*u); ctx.lineTo(10*u, ey + 1*u); ctx.stroke();
+    } else if (cat === "sun"){
+      ctx.fillRect(-15*u, ey - 5*u, 13*u, 8*u); ctx.fillRect(2*u, ey - 5*u, 13*u, 8*u); ctx.fillRect(-3*u, ey - 4*u, 6*u, 2*u);
+      ctx.fillStyle = "#FF3EA5"; ctx.fillRect(-13*u, ey - 3*u, 4*u, 2*u); ctx.fillRect(4*u, ey - 3*u, 4*u, 2*u);
+      ctx.fillStyle = INK;
+    } else {
+      const blink = (t % 4) < .12;
+      for (const x of [-7*u, 7*u]){
+        ctx.beginPath(); ctx.ellipse(x, ey, 2.4*u, blink ? .6*u : 3.6*u, 0, 0, Math.PI*2); ctx.fill();
+      }
+    }
+    const my = headTop + 22*u;
+    ctx.beginPath();
+    if (mouth === "smile" || mouth === "smug"){ ctx.arc(0, my - 4*u, 8*u, .18*Math.PI, .82*Math.PI); ctx.stroke(); }
+    else if (mouth === "flat"){ ctx.moveTo(-6*u, my); ctx.lineTo(6*u, my); ctx.stroke(); }
+    else if (mouth === "o"){ ctx.ellipse(0, my + 1*u, 3.5*u, 4.5*u, 0, 0, Math.PI*2); ctx.fill(); }
+    else if (mouth === "chatter"){ ctx.moveTo(-8*u, my); for (let i = 1; i <= 4; i++) ctx.lineTo(-8*u + i*4*u, my + (i%2 ? -3 : 0)*u + Math.sin(t*40)*u); ctx.stroke(); }
+    else if (mouth === "sleep"){ ctx.ellipse(0, my, 2.5*u, 2*u, 0, 0, Math.PI*2); ctx.fill(); }
+    ctx.restore();
+    if (hot && !white){ // sweat drops
+      for (let i = 0; i < 2; i++){
+        const p = (t*0.9 + i*0.5) % 1;
+        ctx.fillStyle = "#6FD3FF"; ctx.strokeStyle = INK; ctx.lineWidth = 2*u;
+        ctx.beginPath(); ctx.ellipse((i ? 20 : -21)*u, headTop + 6*u + p*24*u, 3.2*u, 4.5*u, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      }
+    }
+    // hats and extras
+    if (cat === "storm" && !white){ // spiky hair
+      ctx.fillStyle = INK;
+      ctx.beginPath(); ctx.moveTo(-18*u, headTop + 2*u);
+      for (let i = 0; i < 6; i++){ ctx.lineTo(-15*u + i*6*u, headTop - 12*u - (i%2)*6*u); ctx.lineTo(-12*u + i*6*u, headTop + 2*u); }
+      ctx.closePath(); ctx.fill();
+    }
+    if (cat === "snow"){ // scarf
+      box(-21*u, torsoTop - 3*u, 42*u, 10*u, "#FF3EA5", 3, 3);
+      ctx.save(); ctx.translate(12*u, torsoTop + 5*u); ctx.rotate(-.2 + Math.sin(t*6)*.12);
+      box(-5*u, 0, 11*u, 24*u, "#FF3EA5", 2, 3); ctx.fillStyle = "#FFD319"; ctx.fillRect(-4*u, 16*u, 9*u, 4*u); ctx.restore();
+    }
+    if (cat === "night"){ // nightcap
+      ctx.fillStyle = "#2DE2E6"; ctx.strokeStyle = INK; ctx.lineWidth = 3*u;
+      ctx.beginPath(); ctx.moveTo(-19*u, headTop + 5*u); ctx.lineTo(19*u, headTop + 5*u); ctx.lineTo(30*u, headTop - 18*u + Math.sin(t*1.3)*2*u); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#FFFFFF"; ctx.beginPath(); ctx.arc(31*u, headTop - 19*u + Math.sin(t*1.3)*2*u, 5*u, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    }
+    if (cat === "fog"){ // question marks
+      ctx.font = `${22*u}px Bungee, sans-serif`; ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = INK; ctx.lineWidth = 3*u;
+      const q = (t*.6) % 1;
+      ctx.globalAlpha = 1 - q; ctx.strokeText("?", -30*u, headTop - 8*u - q*30*u); ctx.fillText("?", -30*u, headTop - 8*u - q*30*u);
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+
+    // wind: flying top hat (world space)
+    if (cat === "wind"){
+      const cyc = (t % 3.2) / 3.2;
+      let hx = cx - 2*u, hy = gy - bounce + headTop - 12*u, rot = -.16;
+      if (cyc > .3){ const p = (cyc - .3) / .7; hx += p*W*0.8; hy -= Math.sin(p*Math.PI)*70*u + p*20*u; rot = p*12; }
+      ctx.save(); ctx.translate(hx, hy); ctx.rotate(rot);
+      box(-20*u, 6*u, 40*u, 7*u, "#1B1B2F", 2, 3); box(-13*u, -20*u, 26*u, 28*u, "#1B1B2F", 2, 3);
+      ctx.fillStyle = "#FF3EA5"; ctx.fillRect(-12*u, 0, 24*u, 5*u); ctx.restore();
+    }
+    // Zzz
+    if (cat === "night"){
+      ctx.font = `${16*s}px Bungee, sans-serif`; ctx.lineWidth = 3*s; ctx.strokeStyle = INK; ctx.fillStyle = "#FFF1A8";
+      for (let i = 0; i < 3; i++){
+        const p = ((t*.4) + i/3) % 1;
+        ctx.globalAlpha = 1 - p;
+        const zx = cx + 30*s + p*40*s, zy = gy - 130*s - p*60*s;
+        ctx.strokeText("Z", zx, zy); ctx.fillText("Z", zx, zy);
+      }
+      ctx.globalAlpha = 1;
+    }
+    // speech bubble position
+    const b = $("bubble");
+    if (!b.hidden){
+      b.style.left = (cx + 14*s) + "px";
+      b.style.top = (gy - bounce - jy + headTop - 8*u) + "px";
+    }
+  }
+
+  /* ---------- particles ---------- */
+  function targetCount(){
+    const d = self.day || {};
+    const m = reduceMotion ? .35 : 1;
+    const c = self.cat;
+    return {
+      drops: Math.round(m * (c === "storm" ? 170 : c === "rain" ? Math.min(150, 60 + (d.mm||5)*6) : c === "drizzle" ? 40 : 0)),
+      flakes: Math.round(m * (c === "snow" ? 90 : 0)),
+      leaves: Math.round(m * (c === "wind" ? 14 : 0)),
+      lines: Math.round(m * (c === "wind" ? 7 : 0))
+    };
+  }
+  function sync(arr, n, make){ while (arr.length < n) arr.push(make(true)); arr.length = Math.min(arr.length, n); }
+  function windVx(){ return self.cat === "wind" ? 320*s : self.cat === "storm" ? 110*s : self.cat === "rain" ? 40*s : 10*s; }
+
+  function update(dt){
+    const tc = targetCount();
+    sync(drops, tc.drops, () => ({x: Math.random()*W*1.3 - W*.3, y: Math.random()*gy, v: (520 + Math.random()*260)*s}));
+    sync(flakes, tc.flakes, () => ({x: Math.random()*W, y: Math.random()*gy, v: (30 + Math.random()*40)*s, p: Math.random()*6, z: 3 + Math.random()*4}));
+    sync(leaves, tc.leaves, () => ({x: -Math.random()*W, y: Math.random()*gy, v: (200 + Math.random()*200)*s, p: Math.random()*6}));
+    sync(lines, tc.lines, () => ({x: Math.random()*W, y: Math.random()*gy*0.9, v: (500 + Math.random()*300)*s, l: (40 + Math.random()*60)*s}));
+    const vx = windVx();
+    for (const d of drops){
+      d.y += d.v*dt; d.x += vx*dt;
+      if (d.y > gy){ if (Math.random() < .5) splashes.push({x: d.x, y: gy, life: .25}); d.y = -20*s - Math.random()*gy*.3; d.x = Math.random()*W*1.3 - W*.3; }
+    }
+    for (const f of flakes){
+      f.y += f.v*dt; f.x += Math.sin(t*1.5 + f.p)*20*s*dt + vx*.2*dt;
+      if (f.y > gy){ f.y = -10*s; f.x = Math.random()*W; }
+    }
+    for (const l of leaves){
+      l.x += l.v*dt; l.y += Math.sin(t*4 + l.p)*60*s*dt;
+      if (l.x > W + 20*s){ l.x = -20*s - Math.random()*W*.4; l.y = Math.random()*gy; }
+    }
+    for (const l of lines){ l.x += l.v*dt; if (l.x > W + l.l){ l.x = -l.l - Math.random()*W*.5; l.y = Math.random()*gy*0.9; } }
+    for (let i = splashes.length - 1; i >= 0; i--){ splashes[i].life -= dt; if (splashes[i].life <= 0) splashes.splice(i, 1); }
+    for (const c of clouds){ c.x += c.v*dt; if (c.x > W + 90*s) c.x = -90*s; }
+
+    // lightning
+    if (self.cat === "storm"){
+      nextBolt -= dt;
+      if (nextBolt <= 0){
+        const hitGuy = Math.random() < .35;
+        const x0 = Math.random()*W, x1 = hitGuy ? self.cx() : Math.random()*W;
+        const y1 = hitGuy ? gy - 120*s : gy;
+        const pts = [[x0, 0]];
+        const segs = 7;
+        for (let i = 1; i < segs; i++) pts.push([x0 + (x1 - x0)*i/segs + (Math.random() - .5)*50*s, y1*i/segs]);
+        pts.push([x1, y1]);
+        bolt = {pts, life: .22};
+        flash = reduceMotion ? .3 : 1;
+        if (hitGuy){ zap = .6; sfx.zap(); setTimeout(sfx.oof, 180); showBubble("OOF!"); }
+        sfx.thunder(hitGuy ? .1 : .3 + Math.random()*.8);
+        nextBolt = 2.5 + Math.random()*4;
+      }
+    }
+    if (bolt){ bolt.life -= dt; if (bolt.life <= 0) bolt = null; }
+    flash = Math.max(0, flash - dt*3);
+    zap = Math.max(0, zap - dt);
+    staticT = Math.max(0, staticT - dt);
+    if (jump > 0){ jump += jumpV*dt; jumpV -= 900*s*dt; if (jump <= 0){ jump = 0; } }
+    if (bubbleT > 0){ bubbleT -= dt; if (bubbleT <= 0) $("bubble").hidden = true; }
+  }
+
+  function drawParticles(front){
+    const c = self.cat;
+    if (!front){
+      if (c === "wind"){
+        ctx.strokeStyle = "rgba(255,255,255,.9)"; ctx.lineWidth = 3*s; ctx.lineCap = "round";
+        for (const l of lines){
+          ctx.beginPath(); ctx.moveTo(l.x - l.l, l.y);
+          ctx.quadraticCurveTo(l.x - l.l/2, l.y - 8*s, l.x, l.y); ctx.stroke();
+        }
+      }
+      return;
+    }
+    if (drops.length){
+      const vx = windVx();
+      ctx.lineCap = "butt";
+      for (const d of drops){
+        const len = 16*s, dx = vx/d.v*len;
+        ctx.strokeStyle = INK; ctx.lineWidth = 4.5*s;
+        ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x + dx, d.y + len); ctx.stroke();
+        ctx.strokeStyle = c === "storm" ? "#B89CFF" : "#8FE3FF"; ctx.lineWidth = 2.2*s;
+        ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x + dx, d.y + len); ctx.stroke();
+      }
+      ctx.fillStyle = "#BFEFFF";
+      for (const sp of splashes){
+        const k = (1 - sp.life/.25)*10*s;
+        ctx.fillRect(sp.x - k, sp.y - k*.6, 3*s, 3*s); ctx.fillRect(sp.x + k, sp.y - k*.6, 3*s, 3*s);
+      }
+    }
+    for (const f of flakes){
+      ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(t + f.p);
+      const z = f.z*s; ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = INK; ctx.lineWidth = 1.6*s;
+      ctx.fillRect(-z/2, -z/2, z, z); ctx.strokeRect(-z/2, -z/2, z, z); ctx.restore();
+    }
+    for (const l of leaves){
+      ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(t*6 + l.p);
+      ctx.fillStyle = l.p > 3 ? "#FFB020" : "#3FAE4A"; ctx.strokeStyle = INK; ctx.lineWidth = 2*s;
+      ctx.fillRect(-5*s, -5*s, 10*s, 10*s); ctx.strokeRect(-5*s, -5*s, 10*s, 10*s); ctx.restore();
+    }
+  }
+  function drawFog(){
+    ctx.fillStyle = "rgba(245,242,255,.55)";
+    for (let i = 0; i < 4; i++){
+      const y = gy - 30*s - i*55*s, off = ((t*(10 + i*6)*s) + i*120*s) % (W + 300*s) - 150*s;
+      rr(off - 150*s, y - 22*s, 300*s, 44*s, 22*s); ctx.fill();
+      rr(W - off - 120*s, y + 10*s, 260*s, 36*s, 18*s); ctx.fill();
+    }
+  }
+  function drawBolt(){
+    if (!bolt) return;
+    ctx.lineJoin = "miter"; ctx.lineCap = "round";
+    ctx.strokeStyle = INK; ctx.lineWidth = 11*s;
+    ctx.beginPath(); bolt.pts.forEach(([x,y],i) => i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.stroke();
+    ctx.strokeStyle = "#FFD319"; ctx.lineWidth = 6*s; ctx.stroke();
+    ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 2*s; ctx.stroke();
+  }
+  function drawStatic(){
+    if (staticT <= 0) return;
+    const img = nctx.createImageData(80, 72);
+    for (let i = 0; i < img.data.length; i += 4){ const v = Math.random()*255; img.data[i] = img.data[i+1] = img.data[i+2] = v; img.data[i+3] = 255; }
+    nctx.putImageData(img, 0, 0);
+    ctx.save(); ctx.globalAlpha = Math.min(1, staticT*3); ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(noiseC, 0, 0, W, H);
+    ctx.fillStyle = "#FF3EA5"; ctx.font = `${20*s}px Bungee, sans-serif`; ctx.textAlign = "center";
+    ctx.fillText("CH " + (state.day + 3), W/2, H/2); ctx.textAlign = "start";
+    ctx.restore();
+  }
+
+  function frame(ts){
+    const dt = Math.min(.05, (ts - last)/1000); last = ts;
+    if (!document.hidden){
+      t += dt;
+      update(dt);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      drawSky();
+      if (self.cat === "night") drawStars();
+      if (self.cat === "sun" || self.cat === "partly" || self.cat === "wind") drawSun();
+      if (self.cat === "night") drawMoon();
+      drawHills();
+      for (const c of clouds) drawCloud(c);
+      drawParticles(false);
+      drawBolt();
+      drawTree(W*0.1, 1);
+      drawTree(W*0.93, .8);
+      drawGround();
+      if (self.cat === "snow") drawSnowman();
+      drawNoob();
+      drawParticles(true);
+      if (self.cat === "fog") drawFog();
+      if (flash > 0){ ctx.fillStyle = `rgba(255,255,255,${flash*.75})`; ctx.fillRect(0, 0, W, H); }
+      drawStatic();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  new ResizeObserver(resize).observe(cv);
+  resize();
+  requestAnimationFrame(frame);
+  return self;
+})();
+
+/* =========================================================
+   WIRING
+   ========================================================= */
+document.addEventListener("pointerdown", unlockAudio, {capture: true});
+document.addEventListener("keydown", unlockAudio, {capture: true});
+
+$("scene").addEventListener("click", () => scene.poke());
+$("d0").addEventListener("click", () => { if (state.day !== 0){ state.day = 0; sfx.select(); render(); } });
+$("d1").addEventListener("click", () => { if (state.day !== 1){ state.day = 1; sfx.select(); render(); } });
+$("d2").addEventListener("click", () => {
+  sfx.error();
+  const card = $("card");
+  card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake");
+  $("prophLabel").textContent = "ERROR 404";
+  $("prophecy").textContent = [
+    "FUTURE NOT FOUND. Our prophecy license only covers 48 hours. Beyond that it is just vibes and pigeons.",
+    "Day 3 is locked behind Oofcast Premium, which does not exist and never will. Come back tomorrow, when day 3 becomes day 2.",
+    "Access denied. The last intern who looked 72 hours ahead is still stuck in the year 1987."
+  ][Math.floor(Math.random()*3)];
+  scene.poke();
+});
+$("reroll").addEventListener("click", () => {
+  state.roll[state.day]++; state.count++;
+  sfx.coin(); render();
+});
+$("speak").addEventListener("click", () => {
+  const text = $("prophecy").textContent;
+  try {
+    const synth = window.speechSynthesis;
+    if (!synth) throw new Error("no speech");
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance("Beep boop. " + text.replace(/°C/g, " degrees").replace(/°F/g, " degrees Fahrenheit"));
+    u.pitch = 0.1; u.rate = 1.05;
+    synth.speak(u);
+    sfx.blip();
+  } catch (e) {
+    sfx.error();
+    setStatus("This browser has no robot voice installed. The robot is sad. Beep.");
+  }
+});
+$("locate").addEventListener("click", () => { sfx.select(); locate(); });
+$("search").addEventListener("submit", e => { e.preventDefault(); sfx.select(); searchCity($("city").value.trim()); $("city").blur(); });
+$("snd").addEventListener("click", () => {
+  const on = $("snd").getAttribute("aria-pressed") !== "true";
+  $("snd").setAttribute("aria-pressed", on);
+  $("snd").textContent = on ? "SND ON" : "SND OFF";
+  audioInit();
+  state.audio = on && !!A.ctx;
+  if (A.ctx){ A.ctx.resume && A.ctx.resume(); A.master.gain.setTargetAtTime(on ? .55 : 0, A.ctx.currentTime, .05); setBed(scene.cat); }
+  if (on) sfx.select();
+});
+$("unit").addEventListener("click", () => { state.unitC = !state.unitC; $("unit").setAttribute("aria-pressed", state.unitC); sfx.blip(); render(); });
+
+const CHIPS = [["sun","SUN"],["partly","PARTLY"],["cloudy","CLOUDY"],["drizzle","DRIZZLE"],["rain","RAIN"],["storm","STORM"],["snow","SNOW"],["fog","FOG"],["wind","WIND"],["night","NIGHT"],[null,"REAL SKY"]];
+for (const [cat, label] of CHIPS){
+  const b = document.createElement("button");
+  b.className = "chip"; b.textContent = label; b.dataset.cat = cat || "";
+  b.addEventListener("click", () => {
+    if (!cat && !state.live){ sfx.error(); setStatus("No real sky loaded yet. Tap USE MY LOCATION or search a city first."); return; }
+    state.override = cat; state.count++; sfx.select(); render();
+  });
+  $("chips").appendChild(b);
+}
+
+// boot: show a working sim scene right away, then try the real sky
+goSim();
+setStatus("");
+locate();
+})();
+</script>
+</body>
+</html>
