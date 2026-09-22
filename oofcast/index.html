@@ -1451,12 +1451,15 @@ const scene = (() => {
    MUSIC: the Oofcast Mixtape, a tiny SID-flavoured sequencer.
    Everything is synthesized live; no audio files.
    Notation: one token per 16th note. "." rest, "-" hold previous note.
-   drums: k kick, s snare, c clap. hats: h closed, o open.
+   drums: k kick, s snare, c clap, r rimshot, D kick+rim (one drop).
+   hats: h closed, o open. stabs: x plays the bar's chord as a short stab.
    fx: x baby scratch, X chirp scratch, r tape rewind, q quack,
-       b boing, z laser, o oof, v beep-boop.
+       b boing, z laser, o oof, v beep-boop, a air horn, y dub siren,
+       e truck reversing beep.
    ========================================================= */
 const bars = (...b) => b.join(" ");
 const oct8 = (...roots) => roots.map(r => { const [n, o] = [r.slice(0, -1), +r.slice(-1)]; return Array(4).fill(`${n}${o} . ${n}${o+1} .`).join(" "); }).join(" ");
+const tres = (...roots) => roots.map(r => `${r} - - ${r} - - ${r} - ${r} - - ${r} - - ${r} -`).join(" ");
 const TRACKS = [
   {
     title: 'LOAD"*",8,1 BOOGIE', blocks: 23,
@@ -1517,6 +1520,70 @@ const TRACKS = [
     drums: ["k...s...k...s...", "k...s...k...s.kc"], hats: "h.o.h.o.h.o.h.o.", arp: ".x.x.x.x.x.x.x.x",
     fx: "................ ..............X. ................ ..v.........x.x.",
     fxBreak: "x.x.X...x.x.X... x.x.X...X.X.X.X. b...b...b.b.b.b. r..............."
+  },
+  {
+    title: "TECHNO TRUCK (BEEP BEEP REVERSING)", blocks: 42,
+    desc: "acid bassline, four on the floor, one lorry backing into the dancefloor",
+    bpm: 128, swing: 0, lead: "p25", leadShift: 0, bassWave: "sawtooth", acid: true, bars: 4,
+    bass: "A1 A1 A2 A1 . A1 C2 A1 A1 . A2 . G1 A1 C2 D2",
+    melody: ".",
+    chords: ["A3 C4 E4", "A3 C4 E4", "F3 A3 C4", "G3 B3 D4"],
+    stabs: "..x...x...x..x..", stabWave: "p25", stabCut: 1600,
+    drums: ["k...c...k...c...", "k...c...k...c.kk"], hats: "hhohhhohhhohhhoh", arp: "................",
+    fx: "................ ................ ................ ............e.e.",
+    fxBreak: "e...e...e...e... e...e...e...e... z.z.z.z.zzzz.... r..............."
+  },
+  {
+    title: "DUB DISK DRIVE (ONE DROP)", blocks: 28,
+    desc: "deep bass, offbeat skank, echoes bouncing around a 1541 disk drive",
+    bpm: 74, swing: .1, lead: "triangle", leadShift: 0, bassWave: "triangle", dub: true, bars: 4,
+    bass: bars("A1 - - . . . E2 - A1 - . . C2 - D2 -", "E2 - - . . . . . A1 - . . G1 - E1 -",
+               "D2 - - . . . A1 - D2 - . . F2 - E2 -", "E2 - - . . . B1 - E2 - . . G2 - E2 -"),
+    melody: bars(". . . . . . . . . . . . . . . .", "E4 - - - D4 - C4 - A3 - - - . . . .",
+                 ". . . . . . . . . . . . . . . .", "G4 - - - E4 - D4 - E4 - - - - - . ."),
+    chords: ["A3 C4 E4", "A3 C4 E4", "D4 F4 A4", "E4 G4 B4"],
+    stabs: "....x.......x...", stabWave: "p25", stabCut: 2200,
+    drums: ["........D.......", "........D.....r."], hats: "..h...h...h...h.", arp: "................",
+    fx: "................ ...y............ ................ ................",
+    fxBreak: "y............... ....o.......o... y............... r..............."
+  },
+  {
+    title: "REGGAETON RAM (DEMBOW 64K)", blocks: 26,
+    desc: "dembow riddim, sub bass, air horns sold separately (but included)",
+    bpm: 94, swing: 0, lead: "triangle", leadShift: 0, bassWave: "sine", bars: 4,
+    bass: tres("B1", "G1", "D2", "A1"),
+    melody: bars("F#4 . F#4 . D4 . B3 . . . D4 . E4 . F#4 .", "G4 . F#4 . E4 . D4 . . . . . . . . .",
+                 "F#4 . F#4 . A4 . F#4 . . . E4 . D4 . E4 .", "C#4 - - - . . . . . . . . . . . ."),
+    chords: ["B3 D4 F#4", "G3 B3 D4", "D4 F#4 A4", "A3 C#4 E4"],
+    drums: ["k..sk.s.k..sk.s.", "k..sk.s.k..sk.ss"], hats: "h.h.h.h.h.h.h.h.", arp: "x..x..x.x..x..x.",
+    fx: "a............... ................ ................ ........q.q.a...",
+    fxBreak: "a...a...a....... o..o..o.o..o..o. x.x.X...x.x.X... a.a.a.a.r......."
+  },
+  {
+    title: "BROKEN BEAT BUFFER OVERFLOW", blocks: 33,
+    desc: "West London shuffle, jazzy chords, drums that trip over their own cables",
+    bpm: 116, swing: .12, lead: "p25", leadShift: 0, bassWave: "p50", bars: 4,
+    bass: bars("D2 . . D2 . . . A1 . . C2 . D2 . . .", "G1 . . G2 . . . F2 . . E2 . D2 . . .",
+               "C2 . . C2 . . . G1 . . Bb1 . C2 . . .", "A1 . . A2 . . . G2 . . E2 . C#2 . . ."),
+    melody: ".",
+    chords: ["D3 F3 A3 C4 E4", "G3 B3 E4 F4", "C3 E3 G3 B3 D4", "A2 C#3 G3 Bb3"],
+    stabs: "..x..x....x..x..", stabWave: "triangle", stabCut: 2000,
+    drums: ["k.....s.k.k...s.", "k..k..s...k..s.s"], hats: "h.hh.h.hh.hh.h.o", arp: "................",
+    fx: "................ ..........x..... ................ ......v.....X...",
+    fxBreak: "x..x..X...x..X.. b............... x..x..X...x..X.. r..............."
+  },
+  {
+    title: "IN THE HALL OF THE MOUNTAIN KING (GRIEG, 1875)", blocks: 18,
+    desc: "public domain classic that speeds up every loop until the CPU begs for mercy",
+    bpm: 100, swing: 0, lead: "p50", leadShift: 0, bassWave: "p50", accel: true, noBreak: true, bars: 4,
+    bass: bars("B1 . . . F#1 . . . B1 . . . F#1 . . .", "C#2 . . . G#1 . . . C2 . . . G1 . . .",
+               "B1 . . . F#1 . . . B1 . . . F#1 . . .", "F#1 . . . C#2 . . . F#1 . . . . . . ."),
+    melody: bars("B3 - C#4 - D4 - E4 - F#4 - D4 - F#4 - - -", "F4 - C#4 - F4 - - - E4 - C4 - E4 - - -",
+                 "B3 - C#4 - D4 - E4 - F#4 - D4 - F#4 - B4 -", "A4 - F#4 - D4 - F#4 - A4 - - - - - - -"),
+    chords: ["B3 D4 F#4"],
+    drums: ["k.......k.......", "k.......k...k.k."], hats: "....h.......h...", arp: "................",
+    fx: "................ ................ ................ ..............o.",
+    fxBreak: "................ ................ ................ ..............o."
   }
 ];
 const NOTE_IDX = {C:0, D:2, E:4, F:5, G:7, A:9, B:11};
@@ -1539,9 +1606,10 @@ for (const T of TRACKS){
   T.bassP = seq(T.bass); T.leadP = seq(T.melody);
   T.chordF = T.chords.map(c => c.split(" ").map(nf));
   T.fxS = T.fx.replace(/\s/g, ""); T.fxB = T.fxBreak.replace(/\s/g, "");
+  if (T.leadShift == null) T.leadShift = -12; // older tunes: one octave down, easier on the ears
 }
 
-const M = {playing: false, idx: 0, step: 0, next: 0, timer: null, gain: null, an: null, waves: null, silent: null, started: 0};
+const M = {playing: false, idx: 0, step: 0, next: 0, elapsed: 0, dub: null, delay: null, timer: null, gain: null, an: null, waves: null, silent: null, started: 0};
 function pulseWave(w){
   const n = 48, re = new Float32Array(n), im = new Float32Array(n);
   for (let k = 1; k < n; k++) re[k] = (2 / (k*Math.PI)) * Math.sin(k*Math.PI*w);
@@ -1555,6 +1623,12 @@ function musicInit(){
   M.an = A.ctx.createAnalyser(); M.an.fftSize = 64; M.an.smoothingTimeConstant = .6;
   M.gain.connect(comp).connect(M.an).connect(A.ctx.destination);
   M.waves = {p12: pulseWave(.125), p25: pulseWave(.25), p50: pulseWave(.5)};
+  // dub echo bus: delay with filtered feedback, for skanks, rims and sirens
+  M.dub = A.ctx.createGain(); M.dub.gain.value = .5;
+  M.delay = A.ctx.createDelay(2); M.delay.delayTime.value = .6;
+  const fb = A.ctx.createGain(); fb.gain.value = .52;
+  const dl = A.ctx.createBiquadFilter(); dl.type = "lowpass"; dl.frequency.value = 1700;
+  M.dub.connect(M.delay); M.delay.connect(dl).connect(fb).connect(M.delay); M.delay.connect(M.gain);
 }
 function voice(wave){
   const o = A.ctx.createOscillator();
@@ -1591,24 +1665,29 @@ const INST = {
   lead(t, f, dur, T){
     const o = voice(T.lead), g = A.ctx.createGain();
     const lfo = A.ctx.createOscillator(), lg = A.ctx.createGain();
+    f *= Math.pow(2, T.leadShift / 12);
+    const lp = A.ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1800; lp.Q.value = .5;
     o.frequency.setValueAtTime(f, t);
-    lfo.frequency.value = 5.8; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f*.018, t + .22); // delayed SID vibrato
+    lfo.frequency.value = 5.8; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f*.014, t + .22); // delayed SID vibrato
     lfo.connect(lg).connect(o.frequency);
-    const stop = adsr(g, t, .1, .006, .08, .7, t + dur*.92, .06);
-    o.connect(g).connect(M.gain); o.start(t); lfo.start(t); o.stop(stop + .02); lfo.stop(stop + .02);
+    const stop = adsr(g, t, .055, .01, .08, .7, t + dur*.92, .06);
+    o.connect(lp).connect(g).connect(M.gain); o.start(t); lfo.start(t); o.stop(stop + .02); lfo.stop(stop + .02);
   },
   bass(t, f, dur, T){
     const o = voice(T.bassWave), fl = A.ctx.createBiquadFilter(), g = A.ctx.createGain();
     o.frequency.setValueAtTime(f, t);
     fl.type = "lowpass"; fl.Q.value = 9;
-    fl.frequency.setValueAtTime(2800, t); fl.frequency.exponentialRampToValueAtTime(320, t + .16); // funky wah pluck
+    if (T.acid){ // 303-ish: the cutoff drifts up and down over 8 bars, resonance cranked
+      const c = 350 + (Math.sin(M.step / 128 * Math.PI * 2) + 1) * 1400;
+      fl.Q.value = 15; fl.frequency.setValueAtTime(c * 1.8, t); fl.frequency.exponentialRampToValueAtTime(Math.max(120, c * .4), t + .12);
+    } else { fl.frequency.setValueAtTime(2800, t); fl.frequency.exponentialRampToValueAtTime(320, t + .16); } // funky wah pluck
     const stop = adsr(g, t, .24, .004, .1, .55, t + dur*.85, .04);
     o.connect(fl).connect(g).connect(M.gain); o.start(t); o.stop(stop + .02);
   },
   arp(t, freqs, dur){
     const o = voice("p12"), g = A.ctx.createGain();
     for (let k = 0, tt = t; tt < t + dur; tt += 1/50, k++) o.frequency.setValueAtTime(freqs[k % freqs.length], tt); // 50 Hz PAL frame arp
-    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.045, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.03, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
     o.connect(g).connect(M.gain); o.start(t); o.stop(t + dur + .02);
   },
   kick(t){ mTone(t, 165, .28, "sine", .9, 42); mTone(t, 1400, .012, "square", .12); },
@@ -1662,19 +1741,70 @@ const INST = {
       o.connect(f).connect(g).connect(M.gain); o.start(t); o.stop(t + .3);
     }
   },
+  stab(t, freqs, T){
+    const fl = A.ctx.createBiquadFilter(), g = A.ctx.createGain();
+    fl.type = "lowpass"; fl.frequency.setValueAtTime(T.stabCut || 2000, t); fl.frequency.exponentialRampToValueAtTime(400, t + .18);
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.09 / Math.sqrt(freqs.length), t + .005); g.gain.exponentialRampToValueAtTime(.0001, t + .2);
+    for (const f of freqs){ const o = voice(T.stabWave || "p25"); o.frequency.value = f; o.connect(fl); o.start(t); o.stop(t + .22); }
+    fl.connect(g).connect(M.gain);
+    if (T.dub) g.connect(M.dub);
+  },
+  rim(t, T){
+    const g = A.ctx.createGain(); g.gain.value = 1; g.connect(M.gain); if (T.dub) g.connect(M.dub);
+    const o = A.ctx.createOscillator(), og = A.ctx.createGain();
+    o.type = "square"; o.frequency.value = 820; og.gain.setValueAtTime(.18, t); og.gain.exponentialRampToValueAtTime(.0001, t + .03);
+    o.connect(og).connect(g); o.start(t); o.stop(t + .05);
+    const n = A.ctx.createBufferSource(), nf = A.ctx.createBiquadFilter(), ng = A.ctx.createGain();
+    n.buffer = A.noise; nf.type = "bandpass"; nf.frequency.value = 2600; nf.Q.value = 2;
+    ng.gain.setValueAtTime(.3, t); ng.gain.exponentialRampToValueAtTime(.0001, t + .05);
+    n.connect(nf).connect(ng).connect(g); n.start(t, Math.random()); n.stop(t + .07);
+  },
+  airhorn(t){
+    // the dancehall air horn, three blasts, fully legal
+    for (const [st, len] of [[0, .12], [.16, .12], [.32, .45]]){
+      const g = A.ctx.createGain(), fl = A.ctx.createBiquadFilter();
+      fl.type = "lowpass"; fl.frequency.value = 3200;
+      g.gain.setValueAtTime(.0001, t + st); g.gain.linearRampToValueAtTime(.12, t + st + .01); g.gain.setValueAtTime(.12, t + st + len - .03); g.gain.exponentialRampToValueAtTime(.0001, t + st + len);
+      for (const f of [466, 470, 700]){
+        const o = A.ctx.createOscillator(); o.type = "sawtooth";
+        o.frequency.setValueAtTime(f, t + st); o.frequency.linearRampToValueAtTime(f * .96, t + st + len);
+        o.connect(fl); o.start(t + st); o.stop(t + st + len + .02);
+      }
+      fl.connect(g).connect(M.gain);
+    }
+  },
+  siren(t){
+    const o = A.ctx.createOscillator(), l = A.ctx.createOscillator(), lg = A.ctx.createGain(), g = A.ctx.createGain();
+    o.type = "square"; o.frequency.value = 700; l.frequency.value = 5; lg.gain.value = 260;
+    l.connect(lg).connect(o.frequency);
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.05, t + .05); g.gain.setValueAtTime(.05, t + .8); g.gain.exponentialRampToValueAtTime(.0001, t + 1.1);
+    o.connect(g).connect(M.gain); g.connect(M.dub);
+    o.start(t); l.start(t); o.stop(t + 1.15); l.stop(t + 1.15);
+  },
+  reverseBeep(t){ mTone(t, 1040, .16, "p50", .09); },
   beepBoop(t){ mTone(t, 880, .09, "p50", .12); mTone(t + .1, 440, .12, "p50", .12); },
   crackle(t, sd){
     if (Math.random() < .4) mNoise(t + Math.random()*sd, .004, .03 + Math.random()*.06, "highpass", 2500);
     if (Math.random() < .03) mNoise(t + Math.random()*sd, .025, .18, "lowpass", 700);
   }
 };
-function stepDur(){ return 60 / TRACKS[M.idx].bpm / 4; }
+function curBpm(){
+  const T = TRACKS[M.idx];
+  if (!T.accel) return T.bpm;
+  const cyc = Math.floor(M.step / 16 / T.bars) % 6; // accelerando, then back to calm
+  return Math.round(T.bpm * (1 + cyc * .2));
+}
+function stepDur(){ return 60 / curBpm() / 4; }
+function syncDelay(){ if (M.delay) M.delay.delayTime.setValueAtTime(stepDur() * 3, A.ctx.currentTime); }
 function schedStep(i, t0){
   const T = TRACKS[M.idx], sd = stepDur();
   const bar = Math.floor(i / 16), s16 = i % 16, lb = bar % T.bars;
-  const breakdown = Math.floor(bar / T.bars) % 4 === 3; // every 4th loop: melody out, DJ in
+  const breakdown = !T.noBreak && Math.floor(bar / T.bars) % 4 === 3; // every 4th loop: melody out, DJ in
   const t = t0 + (i % 2 ? sd * T.swing : 0);
   const d = T.drums[lb % T.drums.length][s16], h = T.hats[s16];
+  if (d === "D"){ INST.kick(t); INST.rim(t, T); setTimeout(() => { scene.beat = 1; }, Math.max(0, (t - A.ctx.currentTime)*1000)); }
+  if (d === "r") INST.rim(t, T);
+  if (T.stabs && T.stabs[s16] === "x") INST.stab(t, T.chordF[lb % T.chordF.length], T);
   if (d === "k"){ INST.kick(t); setTimeout(() => { scene.beat = 1; }, Math.max(0, (t - A.ctx.currentTime)*1000)); }
   if (d === "s") INST.snare(t);
   if (d === "c") INST.clap(t);
@@ -1693,15 +1823,18 @@ function schedStep(i, t0){
     case "z": INST.laser(t); break;
     case "o": INST.oof(t); break;
     case "v": INST.beepBoop(t); break;
+    case "a": INST.airhorn(t); break;
+    case "y": INST.siren(t); break;
+    case "e": INST.reverseBeep(t); break;
   }
   INST.crackle(t0, sd);
 }
 function tick(){
   if (!M.playing) return;
   const ahead = A.ctx.currentTime + .15;
-  while (M.next < ahead){ schedStep(M.step, M.next); M.next += stepDur(); M.step++; }
-  const secs = M.step * stepDur();
-  $("pmeta").textContent = `${M.idx + 1}/${TRACKS.length} ${TRACKS[M.idx].bpm}BPM ${Math.floor(secs/60)}:${String(Math.floor(secs % 60)).padStart(2, "0")}`;
+  while (M.next < ahead){ const sd = stepDur(); schedStep(M.step, M.next); M.next += sd; M.elapsed += sd; M.step++; }
+  const secs = M.elapsed;
+  $("pmeta").textContent = `${M.idx + 1}/${TRACKS.length} ${curBpm()}BPM ${Math.floor(secs/60)}:${String(Math.floor(secs % 60)).padStart(2, "0")}`;
 }
 function iosAudioUnlock(){
   // iPhones mute Web Audio on the silent switch unless a media element is playing; loop a silent WAV
@@ -1732,7 +1865,7 @@ function musicPlay(){
   if (!A.ctx) return;
   A.ctx.resume && A.ctx.resume();
   iosAudioUnlock();
-  M.playing = true; M.step = 0; M.next = A.ctx.currentTime + .1;
+  M.playing = true; M.step = 0; M.elapsed = 0; M.next = A.ctx.currentTime + .1; syncDelay();
   clearInterval(M.timer); M.timer = setInterval(tick, 25); tick();
   setBed("none");
   musicUI();
@@ -1745,7 +1878,7 @@ function musicPause(){
 }
 function musicTrack(i){
   M.idx = (i + TRACKS.length) % TRACKS.length;
-  if (M.playing){ M.step = 0; M.next = A.ctx.currentTime + .12; INST.rewind(A.ctx.currentTime); }
+  if (M.playing){ M.step = 0; M.elapsed = 0; M.next = A.ctx.currentTime + .12; syncDelay(); INST.rewind(A.ctx.currentTime); }
   musicUI();
 }
 // playlist in C64 directory-listing style
